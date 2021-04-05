@@ -5,7 +5,7 @@
 tensorflow-gpu==1.15.2\
 keras==2.2.4\
 nibabel\
-python-opencv\
+opencv-python\
 matplotlib
 
 # Acknowledgements
