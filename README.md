@@ -6,7 +6,7 @@ tensorflow-gpu==1.15.2\
 keras==2.2.4\
 nibabel\
 python-opencv\
-matplotlib\
+matplotlib
 
 # Acknowledgements
 [medical-decathlon/3D](https://github.com/shailensobhee/medical-decathlon/tree/master/3D) by [shailensobhee](https://github.com/shailensobhee)
