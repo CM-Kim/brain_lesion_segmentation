@@ -3,7 +3,11 @@ import numpy as np
 # Data load
 PATH = './dataset/'
 
-images = np.load(PATH + 'images.npy')
+t1s = np.load(PATH + 't1s.npy')
+t2s = np.load(PATH + 't2s.npy')
+flairs = np.load(PATH + 'flairs.npy')
+images = (t1s + t2s + flairs) / 3
+
 masks = np.load(PATH + 'masks.npy')
 
 images = np.expand_dims(images, axis=-1)
@@ -13,12 +17,30 @@ masks = np.expand_dims(masks, axis=-1)
 from sklearn.model_selection import train_test_split
 import gc
 
-X, X_v, Y, Y_v = train_test_split(images, masks, test_size=0.2)
+X, X_v, Y, Y_v = train_test_split(images, masks, test_size=0.25, random_state=44)
 
+del t1s
+del t2s
+del flairs
 del images
 del masks
 
 gc.collect()
+
+X = np.append( X, [ np.fliplr(x) for x in X], axis=1 )
+Y = np.append( Y, [ np.fliplr(y) for y in Y], axis=1 )
+
+X = np.append(X, (X * 0.9).astype('uint8'), axis=0)
+Y = np.append(Y, Y, axis=0)
+
+ext_X = (X * 1.1).astype('uint8')
+ext_X = np.where(ext_X > 255, 255, ext_X)
+
+X = np.append(X, ext_X, axis=0)
+Y = np.append(Y, Y, axis=0)
+
+print(X.shape)
+print(Y.shape)
 
 # train
 import keras
@@ -35,8 +57,8 @@ unet_model.model.compile(
 
 # callback setting
 checkpoint = keras.callbacks.ModelCheckpoint('./best_checkpoint.h5', verbose=1, save_best_only=True)
-reduce_lr = keras.callbacks.ReduceLROnPlateau(monitor="val_loss", factor=0.2,
-                                          patience=5, min_lr=0.0001)
+reduce_lr = keras.callbacks.ReduceLROnPlateau(monitor="val_loss", factor=0.2, verbose=1,
+                                           patience=5, min_lr=0.0001)
 
 # fit
 hist = unet_model.model.fit(X, Y, batch_size=2, epochs=100, validation_data=(X_v, Y_v), verbose=1, callbacks=[checkpoint, reduce_lr])

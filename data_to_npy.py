@@ -17,16 +17,20 @@ def resize(img):
     return result_img
 
 # file search
+t1s = glob.glob('*/*/*T1_to_MAG.nii.gz')
+t2s = glob.glob('*/*/*T2_to_MAG.nii.gz')
 flair = glob.glob('*/*/*T2FLAIR_to_MAG.nii.gz')
 seg = glob.glob('*/*/*T2FLAIR_to_MAG_ROI.nii.gz')
 
+t1_img = []
+t2_img = []
 t2f_img = []
 masks = []
 
 pat = re.compile('.*\.nii\.gz')
 
 # all file resize and append to arr
-for items in list(zip(flair, seg)):
+for items in list(zip(t1s, t2s, flair, seg)):
     for item in items:
         print(item)
         img = nib.load(item)
@@ -35,23 +39,31 @@ for items in list(zip(flair, seg)):
         if(img.shape[2] != 48):
             over = int((img.shape[2] - 48) / 2)
             img = img[:, :, over : img.shape[2] - over]
-
-        print(img.shape)
+            
         img = resize(img)
-        print(img.shape)
-        is_flair = item.endswith('MAG.nii.gz')
 
-        if is_flair:
+        if item.endswith('FLAIR_to_MAG.nii.gz'):
             t2f_img.append(img)
+        elif item.endswith('T1_to_MAG.nii.gz'):
+            t1_img.append(img)
+        elif item.endswith('T2_to_MAG.nii.gz'):
+            t2_img.append(img)
         else:
             masks.append(img)
-        
+
+
+t1_img = np.array(t1_img)
+t2_img = np.array(t2_img)        
 t2f_img = np.array(t2f_img)
 masks = np.array(masks)
 
+print(t1_img.shape)
+print(t2_img.shape)
 print(t2f_img.shape)
 print(masks.shape)
 
 # save fil
-np.save('./dataset/images_expand.npy', t2f_img)
-np.save('./dataset/masks_expand.npy', masks)
+np.save('./dataset/t1s.npy', t1_img)
+np.save('./dataset/t2s.npy', t2_img)
+np.save('./dataset/flairs.npy', t2f_img)
+np.save('./dataset/masks.npy', masks)

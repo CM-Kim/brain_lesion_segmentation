@@ -3,10 +3,14 @@ dataset
 dataset/*
 
 MsLesion_Data
-MsLesion_Data/*
+MsLesion_Data/
+
+other_data/
+
+training/
 
 # Model
-best_checkpoint.h5
+*.h5
 
 # Python Template
 # Byte-compiled / optimized / DLL files
